@@ -44,9 +44,17 @@ if (isset($_GET['edit'])) {
     $stmt->execute([$_GET['edit']]);
     $editing = $stmt->fetch();
 }
+$q    = trim($_GET['q'] ?? '');
+$like = "%$q%";
 
+$stmt = $pdo->prepare(
+    "SELECT * FROM hospitals
+     WHERE name LIKE ? OR address LIKE ? OR phone LIKE ? OR email LIKE ?
+     ORDER BY name"
+);
+$stmt->execute([$like, $like, $like, $like]);
+$rows = $stmt->fetchAll();
 
-$rows = $pdo->query("SELECT * FROM hospitals ORDER BY name")->fetchAll();
 
 include 'includes/header.php';
 ?>
@@ -90,8 +98,16 @@ include 'includes/header.php';
     </form>
 </div>
 
-<div class="panel table-wrap">
-    <table>
+<div class="panel ">
+
+ <form class="searchbar">
+        <input name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search by blood group, location or name">
+        <button class="btn">Search</button>
+    </form>
+
+
+<div>
+  <table class="table-wrap">
         <tr>
             <th>Name</th>
             <th>Address</th>
@@ -113,6 +129,8 @@ include 'includes/header.php';
             </tr>
         <?php endforeach; ?>
     </table>
+</div>
+   
 </div>
 
 <?php include 'includes/footer.php'; ?>
