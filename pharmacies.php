@@ -1,14 +1,10 @@
 <?php
-// ============================================================
-// pharmacies.php
-// Full CRUD (Create, Read, Update, Delete) for the pharmacies table.
-// ============================================================
+
 require_once 'config/db.php';
 require_once 'config/auth.php';
 require_login();
 
 $page_title = 'Pharmacy Management';
-
 
 if (isset($_POST['save'])) {
 
@@ -17,11 +13,13 @@ if (isset($_POST['save'])) {
     $phone   = trim($_POST['phone']);
 
     if (!empty($_POST['pharmacy_id'])) {
+        
         $stmt = $pdo->prepare(
             "UPDATE pharmacies SET name = ?, address = ?, phone = ? WHERE id = ?"
         );
         $stmt->execute([$name, $address, $phone, $_POST['pharmacy_id']]);
     } else {
+        
         $stmt = $pdo->prepare(
             "INSERT INTO pharmacies (name, address, phone) VALUES (?, ?, ?)"
         );
@@ -31,6 +29,8 @@ if (isset($_POST['save'])) {
     header("Location: pharmacies.php");
     exit;
 }
+
+
 if (isset($_GET['delete'])) {
     $stmt = $pdo->prepare("DELETE FROM pharmacies WHERE id = ?");
     $stmt->execute([$_GET['delete']]);
@@ -38,13 +38,25 @@ if (isset($_GET['delete'])) {
     header("Location: pharmacies.php");
     exit;
 }
+
+
 $editing = null;
 if (isset($_GET['edit'])) {
     $stmt = $pdo->prepare("SELECT * FROM pharmacies WHERE id = ?");
     $stmt->execute([$_GET['edit']]);
     $editing = $stmt->fetch();
 }
-$rows = $pdo->query("SELECT * FROM pharmacies ORDER BY name")->fetchAll();
+
+$q    = trim($_GET['q'] ?? '');
+$like = "%$q%";
+
+$stmt = $pdo->prepare(
+    "SELECT * FROM pharmacies
+     WHERE name LIKE ? OR address LIKE ? OR phone LIKE ?
+     ORDER BY name"
+);
+$stmt->execute([$like, $like, $like]);
+$rows = $stmt->fetchAll();
 
 include 'includes/header.php';
 ?>
@@ -83,7 +95,13 @@ include 'includes/header.php';
     </form>
 </div>
 
-<div class="panel table-wrap">
+<div class="panel">
+    <form class="searchbar">
+        <input name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search by name, address or phone">
+        <button class="btn">Search</button>
+    </form>
+
+    <div class="table-wrap">
     <table>
         <tr>
             <th>Name</th>
@@ -104,6 +122,7 @@ include 'includes/header.php';
             </tr>
         <?php endforeach; ?>
     </table>
+    </div>
 </div>
 
 <?php include 'includes/footer.php'; ?>

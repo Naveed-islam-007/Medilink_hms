@@ -6,6 +6,7 @@ require_login();
 
 $page_title = 'Hospitals & Clinics';
 
+
 if (isset($_POST['save'])) {
 
     $name    = trim($_POST['name']);
@@ -14,13 +15,13 @@ if (isset($_POST['save'])) {
     $email   = trim($_POST['email']);
 
     if (!empty($_POST['hospital_id'])) {
-    
+        
         $stmt = $pdo->prepare(
             "UPDATE hospitals SET name = ?, address = ?, phone = ?, email = ? WHERE id = ?"
         );
         $stmt->execute([$name, $address, $phone, $email, $_POST['hospital_id']]);
     } else {
-      
+    
         $stmt = $pdo->prepare(
             "INSERT INTO hospitals (name, address, phone, email) VALUES (?, ?, ?, ?)"
         );
@@ -31,6 +32,7 @@ if (isset($_POST['save'])) {
     exit;
 }
 
+
 if (isset($_GET['delete'])) {
     $stmt = $pdo->prepare("DELETE FROM hospitals WHERE id = ?");
     $stmt->execute([$_GET['delete']]);
@@ -38,12 +40,14 @@ if (isset($_GET['delete'])) {
     header("Location: hospitals.php");
     exit;
 }
+
 $editing = null;
 if (isset($_GET['edit'])) {
     $stmt = $pdo->prepare("SELECT * FROM hospitals WHERE id = ?");
     $stmt->execute([$_GET['edit']]);
     $editing = $stmt->fetch();
 }
+
 $q    = trim($_GET['q'] ?? '');
 $like = "%$q%";
 
@@ -55,7 +59,6 @@ $stmt = $pdo->prepare(
 $stmt->execute([$like, $like, $like, $like]);
 $rows = $stmt->fetchAll();
 
-
 include 'includes/header.php';
 ?>
 
@@ -65,6 +68,7 @@ include 'includes/header.php';
     <form method="post" class="grid">
 
         <?php if ($editing): ?>
+           
             <input type="hidden" name="hospital_id" value="<?= $editing['id'] ?>">
         <?php endif; ?>
 
@@ -98,16 +102,14 @@ include 'includes/header.php';
     </form>
 </div>
 
-<div class="panel ">
-
- <form class="searchbar">
-        <input name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search by blood group, location or name">
+<div class="panel">
+    <form class="searchbar">
+        <input name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search by name, address, phone or email">
         <button class="btn">Search</button>
     </form>
 
-
-<div>
-  <table class="table-wrap">
+    <div class="table-wrap">
+    <table>
         <tr>
             <th>Name</th>
             <th>Address</th>
@@ -129,8 +131,7 @@ include 'includes/header.php';
             </tr>
         <?php endforeach; ?>
     </table>
-</div>
-   
+    </div>
 </div>
 
 <?php include 'includes/footer.php'; ?>

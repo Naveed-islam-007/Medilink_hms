@@ -6,6 +6,7 @@ require_login();
 
 $page_title = 'Consultations';
 
+
 if (isset($_POST['save'])) {
 
     $patient_id = $_POST['patient_id'];
@@ -15,6 +16,7 @@ if (isset($_POST['save'])) {
     $notes      = trim($_POST['notes']);
 
     if (!empty($_POST['consultation_id'])) {
+    
         $stmt = $pdo->prepare(
             "UPDATE consultations
              SET patient_id = ?, doctor_id = ?, consultation_date = ?, diagnosis = ?, notes = ?
@@ -32,6 +34,8 @@ if (isset($_POST['save'])) {
     header("Location: consultations.php");
     exit;
 }
+
+// ---------- DELETE ----------
 if (isset($_GET['delete'])) {
     $stmt = $pdo->prepare("DELETE FROM consultations WHERE id = ?");
     $stmt->execute([$_GET['delete']]);
@@ -47,16 +51,23 @@ if (isset($_GET['edit'])) {
     $editing = $stmt->fetch();
 }
 
+
 $patients = $pdo->query("SELECT id, name FROM patients ORDER BY name")->fetchAll();
 $doctors  = $pdo->query("SELECT id, name FROM doctors ORDER BY name")->fetchAll();
 
-$rows = $pdo->query(
+$q    = trim($_GET['q'] ?? '');
+$like = "%$q%";
+
+$stmt = $pdo->prepare(
     "SELECT c.*, p.name AS patient, d.name AS doctor
      FROM consultations c
      JOIN patients p ON p.id = c.patient_id
      JOIN doctors d ON d.id = c.doctor_id
+     WHERE p.name LIKE ? OR d.name LIKE ? OR c.diagnosis LIKE ?
      ORDER BY c.id DESC"
-)->fetchAll();
+);
+$stmt->execute([$like, $like, $like]);
+$rows = $stmt->fetchAll();
 
 include 'includes/header.php';
 ?>
@@ -120,7 +131,13 @@ include 'includes/header.php';
     </form>
 </div>
 
-<div class="panel table-wrap">
+<div class="panel">
+    <form class="searchbar">
+        <input name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search by patient, doctor or diagnosis">
+        <button class="btn">Search</button>
+    </form>
+
+    <div class="table-wrap">
     <table>
         <tr>
             <th>Date</th>
@@ -145,6 +162,7 @@ include 'includes/header.php';
             </tr>
         <?php endforeach; ?>
     </table>
+    </div>
 </div>
 
 <?php include 'includes/footer.php'; ?>

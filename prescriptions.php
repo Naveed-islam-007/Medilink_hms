@@ -17,6 +17,7 @@ if (isset($_POST['save'])) {
     $instructions = trim($_POST['instructions']);
 
     if (!empty($_POST['prescription_id'])) {
+        
         $stmt = $pdo->prepare(
             "UPDATE prescriptions
              SET patient_id = ?, doctor_id = ?, prescription_date = ?, medicine_name = ?, dosage = ?, instructions = ?
@@ -24,6 +25,7 @@ if (isset($_POST['save'])) {
         );
         $stmt->execute([$patient_id, $doctor_id, $date, $medicine, $dosage, $instructions, $_POST['prescription_id']]);
     } else {
+        
         $stmt = $pdo->prepare(
             "INSERT INTO prescriptions (patient_id, doctor_id, prescription_date, medicine_name, dosage, instructions)
              VALUES (?, ?, ?, ?, ?, ?)"
@@ -34,6 +36,8 @@ if (isset($_POST['save'])) {
     header("Location: prescriptions.php");
     exit;
 }
+
+
 if (isset($_GET['delete'])) {
     $stmt = $pdo->prepare("DELETE FROM prescriptions WHERE id = ?");
     $stmt->execute([$_GET['delete']]);
@@ -41,7 +45,6 @@ if (isset($_GET['delete'])) {
     header("Location: prescriptions.php");
     exit;
 }
-
 
 $editing = null;
 if (isset($_GET['edit'])) {
@@ -54,14 +57,19 @@ if (isset($_GET['edit'])) {
 $patients = $pdo->query("SELECT id, name FROM patients ORDER BY name")->fetchAll();
 $doctors  = $pdo->query("SELECT id, name FROM doctors ORDER BY name")->fetchAll();
 
+$q    = trim($_GET['q'] ?? '');
+$like = "%$q%";
 
-$rows = $pdo->query(
+$stmt = $pdo->prepare(
     "SELECT pr.*, p.name AS patient, d.name AS doctor
      FROM prescriptions pr
      JOIN patients p ON p.id = pr.patient_id
      JOIN doctors d ON d.id = pr.doctor_id
+     WHERE p.name LIKE ? OR d.name LIKE ? OR pr.medicine_name LIKE ?
      ORDER BY pr.id DESC"
-)->fetchAll();
+);
+$stmt->execute([$like, $like, $like]);
+$rows = $stmt->fetchAll();
 
 include 'includes/header.php';
 ?>
@@ -130,7 +138,13 @@ include 'includes/header.php';
     </form>
 </div>
 
-<div class="panel table-wrap">
+<div class="panel">
+    <form class="searchbar">
+        <input name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search by patient, doctor or medicine">
+        <button class="btn">Search</button>
+    </form>
+
+    <div class="table-wrap">
     <table>
         <tr>
             <th>Date</th>
@@ -155,6 +169,7 @@ include 'includes/header.php';
             </tr>
         <?php endforeach; ?>
     </table>
+    </div>
 </div>
 
 <?php include 'includes/footer.php'; ?>
