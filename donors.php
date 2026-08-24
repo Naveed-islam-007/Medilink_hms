@@ -1,15 +1,11 @@
 <?php
-// ============================================================
-// donors.php
-// Full CRUD (Create, Read, Update, Delete) for the blood_donors table.
-// ============================================================
+
 require_once 'config/db.php';
 require_once 'config/auth.php';
 require_login();
 
 $page_title = 'Blood Donor Database';
 
-// ---------- CREATE or UPDATE ----------
 if (isset($_POST['save'])) {
 
     $name        = trim($_POST['name']);
@@ -20,7 +16,7 @@ if (isset($_POST['save'])) {
     $available   = isset($_POST['available']) ? 1 : 0;
 
     if (!empty($_POST['donor_id'])) {
-        // UPDATE an existing donor
+       
         $stmt = $pdo->prepare(
             "UPDATE blood_donors
              SET name = ?, blood_group = ?, phone = ?, location = ?, last_donation_date = ?, available = ?
@@ -28,7 +24,6 @@ if (isset($_POST['save'])) {
         );
         $stmt->execute([$name, $blood_group, $phone, $location, $last_date, $available, $_POST['donor_id']]);
     } else {
-        // INSERT a new donor
         $stmt = $pdo->prepare(
             "INSERT INTO blood_donors (name, blood_group, phone, location, last_donation_date, available)
              VALUES (?, ?, ?, ?, ?, ?)"
@@ -39,8 +34,6 @@ if (isset($_POST['save'])) {
     header("Location: donors.php");
     exit;
 }
-
-// ---------- DELETE ----------
 if (isset($_GET['delete'])) {
     $stmt = $pdo->prepare("DELETE FROM blood_donors WHERE id = ?");
     $stmt->execute([$_GET['delete']]);
@@ -48,16 +41,12 @@ if (isset($_GET['delete'])) {
     header("Location: donors.php");
     exit;
 }
-
-// ---------- Load one donor when the user clicks "Edit" ----------
 $editing = null;
 if (isset($_GET['edit'])) {
     $stmt = $pdo->prepare("SELECT * FROM blood_donors WHERE id = ?");
     $stmt->execute([$_GET['edit']]);
     $editing = $stmt->fetch();
 }
-
-// ---------- READ (search + list donors) ----------
 $q    = trim($_GET['q'] ?? '');
 $like = "%$q%";
 

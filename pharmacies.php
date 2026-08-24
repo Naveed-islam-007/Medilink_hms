@@ -9,7 +9,7 @@ require_login();
 
 $page_title = 'Pharmacy Management';
 
-// ---------- CREATE or UPDATE ----------
+
 if (isset($_POST['save'])) {
 
     $name    = trim($_POST['name']);
@@ -17,13 +17,11 @@ if (isset($_POST['save'])) {
     $phone   = trim($_POST['phone']);
 
     if (!empty($_POST['pharmacy_id'])) {
-        // UPDATE an existing pharmacy
         $stmt = $pdo->prepare(
             "UPDATE pharmacies SET name = ?, address = ?, phone = ? WHERE id = ?"
         );
         $stmt->execute([$name, $address, $phone, $_POST['pharmacy_id']]);
     } else {
-        // INSERT a new pharmacy
         $stmt = $pdo->prepare(
             "INSERT INTO pharmacies (name, address, phone) VALUES (?, ?, ?)"
         );
@@ -33,8 +31,6 @@ if (isset($_POST['save'])) {
     header("Location: pharmacies.php");
     exit;
 }
-
-// ---------- DELETE ----------
 if (isset($_GET['delete'])) {
     $stmt = $pdo->prepare("DELETE FROM pharmacies WHERE id = ?");
     $stmt->execute([$_GET['delete']]);
@@ -42,16 +38,12 @@ if (isset($_GET['delete'])) {
     header("Location: pharmacies.php");
     exit;
 }
-
-// ---------- Load one pharmacy when the user clicks "Edit" ----------
 $editing = null;
 if (isset($_GET['edit'])) {
     $stmt = $pdo->prepare("SELECT * FROM pharmacies WHERE id = ?");
     $stmt->execute([$_GET['edit']]);
     $editing = $stmt->fetch();
 }
-
-// ---------- READ (list all pharmacies) ----------
 $rows = $pdo->query("SELECT * FROM pharmacies ORDER BY name")->fetchAll();
 
 include 'includes/header.php';

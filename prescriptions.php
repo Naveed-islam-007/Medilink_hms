@@ -1,16 +1,12 @@
 <?php
-// ============================================================
-// prescriptions.php
-// Full CRUD (Create, Read, Update, Delete) for the prescriptions table.
-// Each prescription links a patient and a doctor (two foreign keys).
-// ============================================================
+
 require_once 'config/db.php';
 require_once 'config/auth.php';
 require_login();
 
 $page_title = 'Prescriptions & Consultations';
 
-// ---------- CREATE or UPDATE ----------
+
 if (isset($_POST['save'])) {
 
     $patient_id   = $_POST['patient_id'];
@@ -21,7 +17,6 @@ if (isset($_POST['save'])) {
     $instructions = trim($_POST['instructions']);
 
     if (!empty($_POST['prescription_id'])) {
-        // UPDATE an existing prescription
         $stmt = $pdo->prepare(
             "UPDATE prescriptions
              SET patient_id = ?, doctor_id = ?, prescription_date = ?, medicine_name = ?, dosage = ?, instructions = ?
@@ -29,7 +24,6 @@ if (isset($_POST['save'])) {
         );
         $stmt->execute([$patient_id, $doctor_id, $date, $medicine, $dosage, $instructions, $_POST['prescription_id']]);
     } else {
-        // INSERT a new prescription
         $stmt = $pdo->prepare(
             "INSERT INTO prescriptions (patient_id, doctor_id, prescription_date, medicine_name, dosage, instructions)
              VALUES (?, ?, ?, ?, ?, ?)"
@@ -40,8 +34,6 @@ if (isset($_POST['save'])) {
     header("Location: prescriptions.php");
     exit;
 }
-
-// ---------- DELETE ----------
 if (isset($_GET['delete'])) {
     $stmt = $pdo->prepare("DELETE FROM prescriptions WHERE id = ?");
     $stmt->execute([$_GET['delete']]);
@@ -50,7 +42,7 @@ if (isset($_GET['delete'])) {
     exit;
 }
 
-// ---------- Load one prescription when the user clicks "Edit" ----------
+
 $editing = null;
 if (isset($_GET['edit'])) {
     $stmt = $pdo->prepare("SELECT * FROM prescriptions WHERE id = ?");
@@ -58,11 +50,11 @@ if (isset($_GET['edit'])) {
     $editing = $stmt->fetch();
 }
 
-// ---------- Patients & Doctors for the dropdowns ----------
+
 $patients = $pdo->query("SELECT id, name FROM patients ORDER BY name")->fetchAll();
 $doctors  = $pdo->query("SELECT id, name FROM doctors ORDER BY name")->fetchAll();
 
-// ---------- READ (list prescriptions, joined with patient & doctor names) ----------
+
 $rows = $pdo->query(
     "SELECT pr.*, p.name AS patient, d.name AS doctor
      FROM prescriptions pr

@@ -1,9 +1,5 @@
 <?php
-// ============================================================
-// login.php
-// Shows a login form and checks the username/password
-// against the "users" table.
-// ============================================================
+
 require_once 'config/db.php';
 require_once 'config/auth.php';
 
@@ -25,8 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute([$username]);
     $user = $stmt->fetch();
 
-    // Passwords are stored as SHA-256 hashes, so we hash the typed
-    // password the same way and compare the two hashes.
+ 
     if ($user && hash('sha256', $password) === $user['password']) {
         $_SESSION['user_id']  = $user['id'];
         $_SESSION['username'] = $user['username'];

@@ -1,16 +1,12 @@
 <?php
-// ============================================================
-// doctors.php
-// Full CRUD (Create, Read, Update, Delete) for the doctors table.
-// Each doctor optionally belongs to a hospital (foreign key).
-// ============================================================
+
 require_once 'config/db.php';
 require_once 'config/auth.php';
 require_login();
 
 $page_title = 'Healthcare Provider Directory';
 
-// ---------- CREATE or UPDATE ----------
+
 if (isset($_POST['save'])) {
 
     $name           = trim($_POST['name']);
@@ -21,7 +17,7 @@ if (isset($_POST['save'])) {
     $hospital_id    = $_POST['hospital_id'] ?: null;
 
     if (!empty($_POST['doctor_id'])) {
-        // UPDATE an existing doctor
+       
         $stmt = $pdo->prepare(
             "UPDATE doctors
              SET name = ?, specialization = ?, symptoms = ?, phone = ?, email = ?, hospital_id = ?
@@ -29,7 +25,7 @@ if (isset($_POST['save'])) {
         );
         $stmt->execute([$name, $specialization, $symptoms, $phone, $email, $hospital_id, $_POST['doctor_id']]);
     } else {
-        // INSERT a new doctor
+        
         $stmt = $pdo->prepare(
             "INSERT INTO doctors (name, specialization, symptoms, phone, email, hospital_id)
              VALUES (?, ?, ?, ?, ?, ?)"
@@ -41,7 +37,7 @@ if (isset($_POST['save'])) {
     exit;
 }
 
-// ---------- DELETE ----------
+
 if (isset($_GET['delete'])) {
     $stmt = $pdo->prepare("DELETE FROM doctors WHERE id = ?");
     $stmt->execute([$_GET['delete']]);
@@ -50,7 +46,7 @@ if (isset($_GET['delete'])) {
     exit;
 }
 
-// ---------- Load one doctor when the user clicks "Edit" ----------
+
 $editing = null;
 if (isset($_GET['edit'])) {
     $stmt = $pdo->prepare("SELECT * FROM doctors WHERE id = ?");
@@ -58,10 +54,10 @@ if (isset($_GET['edit'])) {
     $editing = $stmt->fetch();
 }
 
-// ---------- Hospitals for the dropdown ----------
+
 $hospitals = $pdo->query("SELECT id, name FROM hospitals ORDER BY name")->fetchAll();
 
-// ---------- READ (search + list doctors, joined with hospital name) ----------
+
 $q    = trim($_GET['q'] ?? '');
 $like = "%$q%";
 

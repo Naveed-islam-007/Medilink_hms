@@ -1,15 +1,10 @@
 <?php
-// ============================================================
-// index.php
-// The dashboard: shows a quick count of rows in each table.
-// ============================================================
+
 require_once 'config/db.php';
 require_once 'config/auth.php';
 require_login();
 
 $page_title = 'Dashboard';
-
-// Table name => label shown on the card
 $tables = [
     'patients'     => 'Patients',
     'doctors'      => 'Doctors',
@@ -21,7 +16,6 @@ $tables = [
     'consultations'=> 'Consultations',
 ];
 
-// Count how many rows are in each table
 $stats = [];
 foreach ($tables as $table => $label) {
     $stats[$table] = $pdo->query("SELECT COUNT(*) FROM $table")->fetchColumn();

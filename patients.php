@@ -1,27 +1,22 @@
 <?php
-// ============================================================
-// patients.php
-// Full CRUD (Create, Read, Update, Delete) for the patients table,
-// plus a simple search box.
-// ============================================================
+
 require_once 'config/db.php';
 require_once 'config/auth.php';
 require_login();
 
 $page_title = 'Patient Management';
 
-// ---------- CREATE or UPDATE ----------
+
 if (isset($_POST['save'])) {
 
     $name        = trim($_POST['name']);
-    $dob         = $_POST['dob'] ?: null;   // empty date -> NULL
+    $dob         = $_POST['dob'] ?: null;   
     $gender      = $_POST['gender'];
     $phone       = trim($_POST['phone']);
     $address     = trim($_POST['address']);
     $blood_group = trim($_POST['blood_group']);
 
     if (!empty($_POST['patient_id'])) {
-        // UPDATE an existing patient
         $stmt = $pdo->prepare(
             "UPDATE patients
              SET name = ?, dob = ?, gender = ?, phone = ?, address = ?, blood_group = ?
@@ -29,7 +24,6 @@ if (isset($_POST['save'])) {
         );
         $stmt->execute([$name, $dob, $gender, $phone, $address, $blood_group, $_POST['patient_id']]);
     } else {
-        // INSERT a new patient
         $stmt = $pdo->prepare(
             "INSERT INTO patients (name, dob, gender, phone, address, blood_group)
              VALUES (?, ?, ?, ?, ?, ?)"
@@ -41,7 +35,7 @@ if (isset($_POST['save'])) {
     exit;
 }
 
-// ---------- DELETE ----------
+
 if (isset($_GET['delete'])) {
     $stmt = $pdo->prepare("DELETE FROM patients WHERE id = ?");
     $stmt->execute([$_GET['delete']]);
@@ -50,7 +44,7 @@ if (isset($_GET['delete'])) {
     exit;
 }
 
-// ---------- Load one patient when the user clicks "Edit" ----------
+
 $editing = null;
 if (isset($_GET['edit'])) {
     $stmt = $pdo->prepare("SELECT * FROM patients WHERE id = ?");
@@ -58,7 +52,6 @@ if (isset($_GET['edit'])) {
     $editing = $stmt->fetch();
 }
 
-// ---------- READ (search + list patients) ----------
 $q    = trim($_GET['q'] ?? '');
 $like = "%$q%";
 

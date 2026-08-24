@@ -1,18 +1,11 @@
 <?php
-// ============================================================
-// hospitals.php
-// Full CRUD (Create, Read, Update, Delete) for the hospitals table.
-// ============================================================
+
 require_once 'config/db.php';
 require_once 'config/auth.php';
 require_login();
 
 $page_title = 'Hospitals & Clinics';
 
-// ---------- CREATE or UPDATE ----------
-// The same form is used for adding a new hospital and editing an
-// existing one. If a hidden "hospital_id" field is present, we UPDATE.
-// Otherwise we INSERT a new row.
 if (isset($_POST['save'])) {
 
     $name    = trim($_POST['name']);
@@ -21,13 +14,13 @@ if (isset($_POST['save'])) {
     $email   = trim($_POST['email']);
 
     if (!empty($_POST['hospital_id'])) {
-        // UPDATE an existing hospital
+    
         $stmt = $pdo->prepare(
             "UPDATE hospitals SET name = ?, address = ?, phone = ?, email = ? WHERE id = ?"
         );
         $stmt->execute([$name, $address, $phone, $email, $_POST['hospital_id']]);
     } else {
-        // INSERT a new hospital
+      
         $stmt = $pdo->prepare(
             "INSERT INTO hospitals (name, address, phone, email) VALUES (?, ?, ?, ?)"
         );
@@ -38,7 +31,6 @@ if (isset($_POST['save'])) {
     exit;
 }
 
-// ---------- DELETE ----------
 if (isset($_GET['delete'])) {
     $stmt = $pdo->prepare("DELETE FROM hospitals WHERE id = ?");
     $stmt->execute([$_GET['delete']]);
@@ -46,8 +38,6 @@ if (isset($_GET['delete'])) {
     header("Location: hospitals.php");
     exit;
 }
-
-// ---------- Load one hospital when the user clicks "Edit" ----------
 $editing = null;
 if (isset($_GET['edit'])) {
     $stmt = $pdo->prepare("SELECT * FROM hospitals WHERE id = ?");
@@ -55,7 +45,7 @@ if (isset($_GET['edit'])) {
     $editing = $stmt->fetch();
 }
 
-// ---------- READ (list all hospitals) ----------
+
 $rows = $pdo->query("SELECT * FROM hospitals ORDER BY name")->fetchAll();
 
 include 'includes/header.php';
@@ -67,7 +57,6 @@ include 'includes/header.php';
     <form method="post" class="grid">
 
         <?php if ($editing): ?>
-            <!-- Hidden field so the PHP code above knows this is an UPDATE -->
             <input type="hidden" name="hospital_id" value="<?= $editing['id'] ?>">
         <?php endif; ?>
 

@@ -1,9 +1,5 @@
 <?php
-// ============================================================
-// search.php
-// A read-only search page: find doctors by name, specialty
-// or symptom. This is the "Read" part of CRUD with a JOIN.
-// ============================================================
+
 require_once 'config/db.php';
 require_once 'config/auth.php';
 require_login();

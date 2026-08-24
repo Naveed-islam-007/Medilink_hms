@@ -1,16 +1,12 @@
 <?php
-// ============================================================
-// medicines.php
-// Full CRUD (Create, Read, Update, Delete) for the medicines table.
-// Each medicine belongs to a pharmacy (foreign key).
-// ============================================================
+
 require_once 'config/db.php';
 require_once 'config/auth.php';
 require_login();
 
 $page_title = 'Pharmacy & Medicine Management';
 
-// ---------- CREATE or UPDATE ----------
+
 if (isset($_POST['save'])) {
 
     $pharmacy_id = $_POST['pharmacy_id'];
@@ -40,7 +36,7 @@ if (isset($_POST['save'])) {
     exit;
 }
 
-// ---------- DELETE ----------
+
 if (isset($_GET['delete'])) {
     $stmt = $pdo->prepare("DELETE FROM medicines WHERE id = ?");
     $stmt->execute([$_GET['delete']]);
@@ -49,7 +45,7 @@ if (isset($_GET['delete'])) {
     exit;
 }
 
-// ---------- Load one medicine when the user clicks "Edit" ----------
+
 $editing = null;
 if (isset($_GET['edit'])) {
     $stmt = $pdo->prepare("SELECT * FROM medicines WHERE id = ?");
@@ -57,10 +53,10 @@ if (isset($_GET['edit'])) {
     $editing = $stmt->fetch();
 }
 
-// ---------- Pharmacies for the dropdown ----------
+
 $pharmacies = $pdo->query("SELECT * FROM pharmacies ORDER BY name")->fetchAll();
 
-// ---------- READ (search + list medicines, joined with pharmacy name) ----------
+
 $q    = trim($_GET['q'] ?? '');
 $like = "%$q%";
 

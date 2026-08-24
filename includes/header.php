@@ -1,9 +1,5 @@
 <?php
-// ============================================================
-// header.php
-// Shared top part of every page: sidebar menu + page title bar.
-// Every page sets $page_title before including this file.
-// ============================================================
+
 require_once __DIR__ . '/../config/auth.php';
 ?>
 <!DOCTYPE html>
